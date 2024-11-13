@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "stdint.h": "c",
+        "stdio.h": "c",
+        "stdbool.h": "c",
+        "leapc.h": "c",
+        "unistd.h": "c",
+        "xdo.h": "c"
+    }
+}
