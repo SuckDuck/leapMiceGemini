@@ -1,2 +1,0 @@
-[2024-11-13 13:31:07.659] [console] [info] calculate_centred_calibrations()#364:  Centred calibration is pointing down, rotating 180 in Z
-[2024-11-13 13:31:36.626] [console] [info] calculate_centred_calibrations()#364:  Centred calibration is pointing down, rotating 180 in Z

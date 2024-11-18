@@ -49,7 +49,8 @@ int openCalibrationFile(int mode, struct stat *st){
     
     char calibrationFileName[256];
     sprintf(calibrationFileName,"%s%s",dataDir,"/calibration");
-    int calibrationFile_fd = open(calibrationFileName,mode ? O_WRONLY||O_CREAT:O_RDONLY);
+    printf("%s: %s\n",mode == 1? "Creating/Writing to" : "Reading",calibrationFileName);
+    int calibrationFile_fd = open(calibrationFileName,mode ? O_WRONLY|O_CREAT:O_RDONLY);
     if(calibrationFile_fd == -1) return -1;
 
     if(st != NULL){
@@ -208,6 +209,10 @@ int incomingMessageHandler(){
                 handStack_append(&leapHandStack, hand);
         }
     }
+}
+
+void help(){
+    
 }
 
 int calibrationMode(){
