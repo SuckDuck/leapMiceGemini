@@ -17,6 +17,7 @@ void printScreenCoordinates(screenCoordinates_t x);
 void printScreenCorners(screenCorners_t corners);
 void printLeapCorners(leapCorners_t corners);
 void printHandAperture(handAperture_t *ap);
+void printCalibrationMsg(int corner);
 
 #pragma endregion
 
@@ -46,6 +47,5 @@ handAperture_t getHandAperture(LEAP_HAND *in);
 int isHandOpen(LEAP_HAND *h, int ignoreIndex, handAperture_t* aperture);
 int64_t getSystemTime();
 void sleepFPS(int fps);
-void printCalibrationMsg(int corner);
 
 #endif

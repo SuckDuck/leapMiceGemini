@@ -13,9 +13,14 @@
 #include "utils.h"
 #include "leapTemplate.h"
 
-#define TRACKER_POINT         TRACKER_POINTS_INDEX_FINGER
+#ifndef BIN_NAME
+#define BIN_NAME              "leapMice"
+#endif
+
+#define TRACKER_POINT         TRACKER_POINTS_PALM
 #define INTERPOLATION_LEVEL   5
 #define CLICK_SENSITIVITY     190
+#define PINCH_SENSITIVITY     0.8f
 #define CLICK_TIMEOUT         150000
 #define APP_FPS               60
 
@@ -23,6 +28,7 @@ LEAP_CONNECTION leapConnection;
 leapHandStack_t leapHandStack;
 leapCorners_t leapCorners;
 screenCorners_t screenCorners;
+clickMode_t clickMode = clickModes_swing;
 int isRunning = 1;
 
 #pragma region // ----------- DELTA TIME ----------- //
@@ -44,7 +50,7 @@ void updateDeltaTime(){
 // @param st: POINTER TO STAT STRUCT FOR OUTPUT
 int openCalibrationFile(int mode, struct stat *st){
     char dataDir[256];
-    sprintf(dataDir,"%s%s",getenv("HOME"),"/.leapmice");
+    sprintf(dataDir,"%s%s%s",getenv("HOME"),"/.",BIN_NAME);
     mkdir(dataDir,0775);
     
     char calibrationFileName[256];
@@ -211,8 +217,13 @@ int incomingMessageHandler(){
     }
 }
 
-void help(){
-    
+int help(){
+    printf("Usage: %s [-option]\n",BIN_NAME);
+    printf("Use a Leap Motion Controller as a mouse\n");
+    printf("-p      Start on pinch mode\n"); 
+    printf("-c      Run the calibration utility\n");
+    printf("-h      Print this help message\n");
+    return 0;
 }
 
 int calibrationMode(){
@@ -285,6 +296,71 @@ int calibrationMode(){
     
 }
 
+int mouseMode(){
+    int rs = 0;
+
+    rs = readCalibrationFile(&leapCorners,&screenCorners);
+    if(rs == -1){
+        fprintf(stderr,"There is no calibration file\n");
+        fprintf(stderr,"Run '%s -c' to generate one\n",BIN_NAME);
+        return 1;
+    }
+
+    xdo_t* x = xdo_new(NULL);
+    LEAP_HAND miceHand;
+    int clickTimeOut = 0;
+    int pinchRelease = 1;
+    while(isRunning){
+        updateDeltaTime();
+        incomingMessageHandler();
+        rs = handStack_getInterpolation(&leapHandStack,&miceHand,INTERPOLATION_LEVEL);
+        if(rs == 0){
+            screenCoordinates_t mouseCoordinates = mapLeapVectorToScreen(
+                miceHand.TRACKER_POINT,&screenCorners,&leapCorners);
+            xdo_move_mouse(x,mouseCoordinates.x,mouseCoordinates.y,screenCorners.screenNum);
+            
+            switch (clickMode){
+                case clickModes_swing:
+                if(miceHand.palm.velocity.z < CLICK_SENSITIVITY*-1){
+                    clickTimeOut = 1;
+                }
+
+                if(miceHand.palm.velocity.z > CLICK_SENSITIVITY && clickTimeOut > 0){
+                    clickTimeOut = 0;
+                    xdo_click_window(x,CURRENTWINDOW,1);
+                }
+                
+                if(clickTimeOut > 0 && clickMode == clickModes_swing){
+                    clickTimeOut += deltaTime;
+                    if(clickTimeOut >= CLICK_TIMEOUT){
+                        clickTimeOut = 0;
+                    }
+                }                
+                break;
+                
+
+                
+                case clickModes_pinch:
+                if(miceHand.pinch_strength > PINCH_SENSITIVITY && pinchRelease){
+                    pinchRelease = 0;
+                    xdo_click_window(x,CURRENTWINDOW,1);
+                }
+
+                if(miceHand.pinch_strength < PINCH_SENSITIVITY && !pinchRelease){
+                    pinchRelease = 1;
+                }
+
+                break;
+            }            
+        }
+
+        sleepFPS(APP_FPS);
+    }
+
+    xdo_free(x);
+    return 0;
+}
+
 int main(int argn, char** argv){
     int rs;
 
@@ -310,53 +386,11 @@ int main(int argn, char** argv){
 
 #pragma endregion
 
-#pragma region // ----------------- CALIBRATION FILE SETUP ----------------- //
-    
     for(int i=0; i<argn; i++){
+        if(strcmp(argv[i],"-h") == 0) return help();
         if(strcmp(argv[i],"-c") == 0) return calibrationMode();
+        if(strcmp(argv[i],"-p") == 0) clickMode = clickModes_pinch;
     }
 
-    rs = readCalibrationFile(&leapCorners,&screenCorners);
-    if(rs == -1){
-        fprintf(stderr,"%s\n","There is no calibration file");
-        return 1;
-    }
-
-#pragma endregion
-
-    xdo_t* x = xdo_new(NULL);
-    LEAP_HAND miceHand;
-    int clickTimeOut = 0;
-    while(isRunning){
-        updateDeltaTime();
-        incomingMessageHandler();
-        rs = handStack_getInterpolation(&leapHandStack,&miceHand,INTERPOLATION_LEVEL);
-        if(rs == 0){
-            screenCoordinates_t mouseCoordinates = mapLeapVectorToScreen(
-                miceHand.TRACKER_POINT,&screenCorners,&leapCorners);
-            xdo_move_mouse(x,mouseCoordinates.x,mouseCoordinates.y,screenCorners.screenNum);
-            
-            if(miceHand.palm.velocity.z < CLICK_SENSITIVITY*-1){
-                clickTimeOut = 1;
-            }
-
-            if(miceHand.palm.velocity.z > CLICK_SENSITIVITY && clickTimeOut > 0){
-                clickTimeOut = 0;
-                xdo_click_window(x,CURRENTWINDOW,1);
-            }
-
-        }
-
-        if(clickTimeOut > 0){
-            clickTimeOut += deltaTime;
-            if(clickTimeOut >= CLICK_TIMEOUT){
-                clickTimeOut = 0;
-            }
-        }
-
-        sleepFPS(APP_FPS);
-    }
-
-    xdo_free(x);
-    return 0;
+    return mouseMode();
 }
