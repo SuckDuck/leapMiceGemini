@@ -56,7 +56,7 @@ int openCalibrationFile(int mode, struct stat *st){
     char calibrationFileName[256];
     sprintf(calibrationFileName,"%s%s",dataDir,"/calibration");
     printf("%s: %s\n",mode == 1? "Creating/Writing to" : "Reading",calibrationFileName);
-    int calibrationFile_fd = open(calibrationFileName,mode ? O_WRONLY|O_CREAT:O_RDONLY);
+    int calibrationFile_fd = open(calibrationFileName,mode ? O_WRONLY|O_CREAT:O_RDONLY, S_IRUSR | S_IRGRP | S_IWUSR | S_IWGRP );
     if(calibrationFile_fd == -1) return -1;
 
     if(st != NULL){
