@@ -37,10 +37,10 @@ This is the expected behaviour for running `leapMice` in
 the default way
 
 ### **Pinch Mode Demonstration**
-![Pinch Mode demonstration](media/pinch_example.gif)
+![Pinch Mode demonstration](media/pinch_example.gif)  
 And this is the expected behaviour for running `leapMice -p`
 
-[Config demonstration](https://youtu.be/mLm4AJPfc7Q)
+[Config demonstration](https://youtu.be/mLm4AJPfc7Q)  
 *it was really hard to film this last one, so sorry for the quality*
 
 Both binary and calibration file would be deleted when running `sudo make uninstall`
