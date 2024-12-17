@@ -31,9 +31,10 @@ updated each time the calibration command is executed.
 Then just run `leapMice` and start using your Leap Motion controller as a mouse. 
 Here are some demostration videos:
 
-[General Usage demonstration](https://youtu.be/NRtYEsZcyKI) \
+![Push Mode demonstration](media/push_example.gif) \
+![Pinch Mode demonstration](media/pinch_example.gif) \
 [Config demonstration](https://youtu.be/mLm4AJPfc7Q) \
-*it was really hard to film these, so sorry for the quality*
+*it was really hard to film this last one, so sorry for the quality*
 
 Both binary and calibration file would be deleted when running `sudo make uninstall`
 
