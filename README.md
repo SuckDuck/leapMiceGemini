@@ -32,7 +32,7 @@ Then just run `leapMice` and start using your Leap Motion controller as a mouse.
 Here are some demostration videos:
 
 ### **Push Mode Demonstration**
-![Push Mode Demonstration](media/push_example.gif)
+![Push Mode Demonstration](media/push_example.gif)  
 This is the expected behaviour for running `leapMice` in
 the default way
 
